@@ -2,7 +2,7 @@
 # cloud_init_app.sh
 # Runs on first boot of each app VM.
 # Installs Python, Nginx, clones the app, and starts Gunicorn as a systemd service.
-# Variables in ${} are injected by Terraform templatefile().
+# Template variables (db_host, db_port, etc.) are injected by Terraform templatefile().
 
 set -euo pipefail
 exec > /var/log/cloud_init_app.log 2>&1
