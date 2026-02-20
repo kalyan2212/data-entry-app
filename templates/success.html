@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Success – Customer Registered{% endblock %}
+
+{% block content %}
+<div class="page-container success-page">
+  <div class="success-banner">
+    <div class="success-icon">&#9989;</div>
+    <h1>Customer Registered Successfully!</h1>
+    <p>The record has been saved to the database.</p>
+  </div>
+
+  <div class="id-badge">
+    <span class="id-label">Unique Customer ID</span>
+    <span class="id-value">#{{ customer.id }}</span>
+  </div>
+
+  {% if customer %}
+  <div class="summary-card">
+    <h2>Summary</h2>
+    <table class="detail-table">
+      <tbody>
+        <tr><th>Customer ID</th><td><strong>#{{ customer.id }}</strong></td></tr>
+        <tr><th>Full Name</th><td>{{ customer.first_name }} {{ customer.last_name }}</td></tr>
+        <tr><th>Address</th>
+            <td>{{ customer.road }}, {{ customer.city }}, {{ customer.state }} {{ customer.zip }}, {{ customer.country }}</td>
+        </tr>
+        <tr><th>Phone</th><td>{{ customer.phone }}</td></tr>
+        <tr><th>Date of Birth</th><td>{{ customer.dob }}</td></tr>
+        <tr><th>Registered At</th><td>{{ customer.created_at }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <div class="form-actions center">
+    <a href="{{ url_for('operator') }}" class="btn btn-primary">&#43; Add Another Customer</a>
+    <a href="{{ url_for('manager') }}" class="btn btn-secondary">&#128269; Search Records</a>
+    <a href="{{ url_for('index') }}" class="btn btn-outline">&#8962; Home</a>
+  </div>
+</div>
+{% endblock %}

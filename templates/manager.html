@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Manager – Search Records{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <h1>&#128269; Customer Search</h1>
+    <p>Search customer records by ID, city, last name, or phone number.</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('manager') }}" class="data-form search-form">
+    <div class="search-bar">
+      <div class="search-type-group">
+        <label for="search_type">Search By</label>
+        <select name="search_type" id="search_type" required>
+          <option value="" disabled {% if not search_type %}selected{% endif %}>-- Select --</option>
+          <option value="id"        {% if search_type == 'id'        %}selected{% endif %}>Customer ID</option>
+          <option value="city"      {% if search_type == 'city'      %}selected{% endif %}>City</option>
+          <option value="last_name" {% if search_type == 'last_name' %}selected{% endif %}>Last Name</option>
+          <option value="phone"     {% if search_type == 'phone'     %}selected{% endif %}>Phone Number</option>
+        </select>
+      </div>
+
+      <div class="search-input-group">
+        <label for="search_term">Search Term</label>
+        <input type="text" id="search_term" name="search_term"
+               value="{{ search_term }}"
+               placeholder="Enter search term…" required/>
+      </div>
+
+      <button type="submit" class="btn btn-primary search-btn">&#128269; Search</button>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+  </form>
+
+  <!-- Results -->
+  {% if search_performed and not error %}
+    <div class="results-section">
+      {% if results %}
+        <div class="results-header">
+          <h2>Results <span class="badge">{{ results|length }} record(s) found</span></h2>
+        </div>
+        <div class="table-wrapper">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Road / Street</th>
+                <th>City</th>
+                <th>State</th>
+                <th>ZIP</th>
+                <th>Country</th>
+                <th>Phone</th>
+                <th>Date of Birth</th>
+                <th>Registered At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in results %}
+              <tr>
+                <td><span class="id-pill">#{{ row.id }}</span></td>
+                <td>{{ row.first_name }}</td>
+                <td>{{ row.last_name }}</td>
+                <td>{{ row.road }}</td>
+                <td>{{ row.city }}</td>
+                <td>{{ row.state }}</td>
+                <td>{{ row.zip }}</td>
+                <td>{{ row.country }}</td>
+                <td>{{ row.phone }}</td>
+                <td>{{ row.dob }}</td>
+                <td>{{ row.created_at }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="no-results">
+          <div class="no-results-icon">&#128203;</div>
+          <p>No records found matching your search criteria.</p>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+// When "Customer ID" or "Phone" is selected, restrict input to digits only
+const typeSelect = document.getElementById('search_type');
+const termInput  = document.getElementById('search_term');
+
+typeSelect.addEventListener('change', function () {
+  if (this.value === 'id' || this.value === 'phone') {
+    termInput.setAttribute('inputmode', 'numeric');
+    termInput.setAttribute('placeholder', 'Digits only…');
+    termInput.addEventListener('input', digitsOnly);
+  } else {
+    termInput.setAttribute('inputmode', 'text');
+    termInput.setAttribute('placeholder', 'Enter search term…');
+    termInput.removeEventListener('input', digitsOnly);
+  }
+});
+
+function digitsOnly() {
+  this.value = this.value.replace(/\D/g, '');
+}
+
+// Trigger on page load if type is already selected (back-navigation)
+if (typeSelect.value === 'id' || typeSelect.value === 'phone') {
+  termInput.setAttribute('inputmode', 'numeric');
+  termInput.addEventListener('input', digitsOnly);
+}
+</script>
+{% endblock %}

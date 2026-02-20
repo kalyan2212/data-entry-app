@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Home – Customer Data System{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1>Customer Data Entry System</h1>
+  <p class="subtitle">Select your role to continue</p>
+
+  <div class="role-cards">
+    <a href="{{ url_for('operator') }}" class="card card-operator">
+      <div class="card-icon">&#128221;</div>
+      <h2>Operator</h2>
+      <p>Enter new customer information into the database.</p>
+      <span class="btn btn-primary">Go to Data Entry &rarr;</span>
+    </a>
+
+    <a href="{{ url_for('manager') }}" class="card card-manager">
+      <div class="card-icon">&#128269;</div>
+      <h2>Manager</h2>
+      <p>Search and view existing customer records.</p>
+      <span class="btn btn-secondary">Go to Search &rarr;</span>
+    </a>
+  </div>
+</div>
+{% endblock %}

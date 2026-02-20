@@ -1,0 +1,96 @@
+name: Deploy Application to Azure VMs
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "terraform/**"           # infra.yml handles Terraform changes
+      - ".github/workflows/**"
+  workflow_dispatch:             # allow manual re-deploy at any time
+
+jobs:
+  deploy:
+    name: Deploy to App VMs
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Azure Login ───────────────────────────────────────────────────────
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: |
+            {
+              "clientId":       "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret":   "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId":       "${{ secrets.AZURE_TENANT_ID }}"
+            }
+
+      # ── 3. Deploy to App VM 1 ────────────────────────────────────────────────
+      # az vm run-command executes a shell script on the VM via the Azure API.
+      # No direct SSH needed – the VMs do not need public IPs.
+      - name: Deploy to app-vm-1
+        run: |
+          az vm run-command invoke \
+            --resource-group data-entry \
+            --name app-vm-1 \
+            --command-id RunShellScript \
+            --scripts "
+              set -e
+              cd /opt/data-entry-app
+              git fetch origin main
+              git reset --hard origin/main
+              /opt/data-entry-app/venv/bin/pip install -q -r requirements.txt
+              sudo systemctl restart data-entry-app
+              sudo systemctl reload nginx
+              echo 'Deployment to app-vm-1 complete'
+            "
+
+      # ── 4. Deploy to App VM 2 ────────────────────────────────────────────────
+      - name: Deploy to app-vm-2
+        run: |
+          az vm run-command invoke \
+            --resource-group data-entry \
+            --name app-vm-2 \
+            --command-id RunShellScript \
+            --scripts "
+              set -e
+              cd /opt/data-entry-app
+              git fetch origin main
+              git reset --hard origin/main
+              /opt/data-entry-app/venv/bin/pip install -q -r requirements.txt
+              sudo systemctl restart data-entry-app
+              sudo systemctl reload nginx
+              echo 'Deployment to app-vm-2 complete'
+            "
+
+      # ── 5. Health check via Load Balancer public IP ──────────────────────────
+      - name: Health Check
+        run: |
+          sleep 20   # give Gunicorn time to restart
+
+          LB_IP=$(az network public-ip show \
+            --resource-group data-entry \
+            --name data-entry-lb-pip \
+            --query ipAddress \
+            --output tsv)
+
+          echo "Testing http://$LB_IP/ ..."
+          HTTP_STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+            --retry 5 --retry-delay 5 http://$LB_IP/)
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "Health check PASSED (HTTP $HTTP_STATUS)"
+          else
+            echo "Health check FAILED (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      # ── 6. Azure Logout ──────────────────────────────────────────────────────
+      - name: Logout from Azure
+        if: always()
+        run: az logout

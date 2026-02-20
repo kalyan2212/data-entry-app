@@ -1,0 +1,81 @@
+name: Terraform – Provision Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths: ["terraform/**"]        # only run when Terraform files change
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to perform"
+        required: true
+        default: "plan"
+        type: choice
+        options: [plan, apply, destroy]
+
+# Azure credentials injected as environment variables so the AzureRM provider
+# can authenticate without any explicit provider config changes.
+env:
+  ARM_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET:   ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
+
+jobs:
+  terraform:
+    name: Terraform ${{ github.event.inputs.action || 'plan+apply' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      # ── 1. Checkout ─────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup Terraform ──────────────────────────────────────────────────
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      # ── 3. Init (connects to Azure Blob backend) ────────────────────────────
+      - name: Terraform Init
+        run: terraform init
+
+      # ── 4. Validate ─────────────────────────────────────────────────────────
+      - name: Terraform Validate
+        run: terraform validate
+
+      # ── 5. Plan ─────────────────────────────────────────────────────────────
+      - name: Terraform Plan
+        id: plan
+        run: |
+          terraform plan \
+            -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var="admin_password=${{ secrets.VM_ADMIN_PASSWORD }}" \
+            -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}" \
+            -var="app_secret_key=${{ secrets.APP_SECRET_KEY }}" \
+            -var="upstream_api_key=${{ secrets.UPSTREAM_API_KEY }}" \
+            -var="downstream_api_key=${{ secrets.DOWNSTREAM_API_KEY }}" \
+            -out=tfplan
+
+      # ── 6. Apply (auto on push to main; manual when action=apply) ───────────
+      - name: Terraform Apply
+        if: |
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          github.event.inputs.action == 'apply'
+        run: terraform apply -auto-approve tfplan
+
+      # ── 7. Destroy (manual only) ─────────────────────────────────────────────
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          terraform destroy -auto-approve \
+            -var="subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var="admin_password=${{ secrets.VM_ADMIN_PASSWORD }}" \
+            -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}" \
+            -var="app_secret_key=${{ secrets.APP_SECRET_KEY }}" \
+            -var="upstream_api_key=${{ secrets.UPSTREAM_API_KEY }}" \
+            -var="downstream_api_key=${{ secrets.DOWNSTREAM_API_KEY }}"

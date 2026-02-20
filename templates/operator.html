@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}Operator – Data Entry{% endblock %}
+
+{% block content %}
+<div class="page-container">
+  <div class="page-header">
+    <h1>&#128221; Customer Data Entry</h1>
+    <p>Fill in all fields to register a new customer.</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('operator') }}" novalidate class="data-form" id="entryForm">
+
+    <!-- ── Name ─────────────────────────────────── -->
+    <fieldset>
+      <legend>Customer Name</legend>
+      <div class="form-row">
+        <div class="form-group {% if errors.first_name %}has-error{% endif %}">
+          <label for="first_name">First Name <span class="req">*</span></label>
+          <input type="text" id="first_name" name="first_name"
+                 value="{{ form_data.get('first_name','') }}"
+                 placeholder="e.g. John" maxlength="100" required/>
+          {% if errors.first_name %}
+            <span class="field-error">{{ errors.first_name }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if errors.last_name %}has-error{% endif %}">
+          <label for="last_name">Last Name <span class="req">*</span></label>
+          <input type="text" id="last_name" name="last_name"
+                 value="{{ form_data.get('last_name','') }}"
+                 placeholder="e.g. Smith" maxlength="100" required/>
+          {% if errors.last_name %}
+            <span class="field-error">{{ errors.last_name }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ── Location ──────────────────────────────── -->
+    <fieldset>
+      <legend>Location</legend>
+      <div class="form-group {% if errors.road %}has-error{% endif %}">
+        <label for="road">Road / Street <span class="req">*</span></label>
+        <input type="text" id="road" name="road"
+               value="{{ form_data.get('road','') }}"
+               placeholder="e.g. 123 Main Street" maxlength="200" required/>
+        {% if errors.road %}
+          <span class="field-error">{{ errors.road }}</span>
+        {% endif %}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group {% if errors.city %}has-error{% endif %}">
+          <label for="city">City <span class="req">*</span></label>
+          <input type="text" id="city" name="city"
+                 value="{{ form_data.get('city','') }}"
+                 placeholder="e.g. New York" maxlength="100" required/>
+          {% if errors.city %}
+            <span class="field-error">{{ errors.city }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if errors.state %}has-error{% endif %}">
+          <label for="state">State <span class="req">*</span></label>
+          <input type="text" id="state" name="state"
+                 value="{{ form_data.get('state','') }}"
+                 placeholder="e.g. NY" maxlength="100" required/>
+          {% if errors.state %}
+            <span class="field-error">{{ errors.state }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group {% if errors.zip %}has-error{% endif %}">
+          <label for="zip">ZIP Code <span class="req">*</span></label>
+          <input type="text" id="zip" name="zip"
+                 value="{{ form_data.get('zip','') }}"
+                 placeholder="e.g. 10001" maxlength="20" required/>
+          {% if errors.zip %}
+            <span class="field-error">{{ errors.zip }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if errors.country %}has-error{% endif %}">
+          <label for="country">Country <span class="req">*</span></label>
+          <input type="text" id="country" name="country"
+                 value="{{ form_data.get('country','') }}"
+                 placeholder="e.g. USA" maxlength="100" required/>
+          {% if errors.country %}
+            <span class="field-error">{{ errors.country }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ── Contact / Personal ────────────────────── -->
+    <fieldset>
+      <legend>Contact &amp; Personal Details</legend>
+      <div class="form-row">
+        <div class="form-group {% if errors.phone %}has-error{% endif %}">
+          <label for="phone">Phone Number <span class="req">*</span>
+            <small>(digits only)</small>
+          </label>
+          <input type="text" id="phone" name="phone"
+                 value="{{ form_data.get('phone','') }}"
+                 placeholder="e.g. 2125550100"
+                 inputmode="numeric" maxlength="20"
+                 pattern="\d+" required/>
+          {% if errors.phone %}
+            <span class="field-error">{{ errors.phone }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group {% if errors.dob %}has-error{% endif %}">
+          <label for="dob">Date of Birth <span class="req">*</span>
+            <small>(MM/DD/YYYY)</small>
+          </label>
+          <input type="text" id="dob" name="dob"
+                 value="{{ form_data.get('dob','') }}"
+                 placeholder="MM/DD/YYYY"
+                 maxlength="10" inputmode="numeric" required/>
+          {% if errors.dob %}
+            <span class="field-error">{{ errors.dob }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="reset" class="btn btn-outline">&#10006; Clear</button>
+      <button type="submit" class="btn btn-primary">&#10003; Submit &amp; Save</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// Phone: allow digits only
+document.getElementById('phone').addEventListener('input', function () {
+  this.value = this.value.replace(/\D/g, '');
+});
+
+// DOB: auto-insert slashes, allow digits only
+document.getElementById('dob').addEventListener('input', function (e) {
+  let val = this.value.replace(/\D/g, '');
+  if (val.length > 4) val = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
+  else if (val.length > 2) val = val.slice(0, 2) + '/' + val.slice(2);
+  this.value = val;
+});
+</script>
+{% endblock %}
