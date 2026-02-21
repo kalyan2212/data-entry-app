@@ -13,13 +13,13 @@ variable "resource_group_name" {
 variable "location" {
   description = "Azure region to deploy all resources."
   type        = string
-  default     = "East US"
+  default     = "East US 2"
 }
 
 variable "vm_size" {
   description = "VM SKU for both app and DB VMs."
   type        = string
-  default     = "Standard_B2ms"
+  default     = "Standard_B2s"
 }
 
 variable "admin_username" {
