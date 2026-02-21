@@ -19,7 +19,7 @@ variable "location" {
 variable "vm_size" {
   description = "VM SKU for both app and DB VMs."
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_B2ms"
 }
 
 variable "admin_username" {

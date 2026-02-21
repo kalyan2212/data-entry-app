@@ -22,12 +22,6 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
-# ── Import pre-existing resource group created by bootstrap.sh ────────────────
-import {
-  to = azurerm_resource_group.main
-  id = "/subscriptions/cd682acc-0b1e-46f0-a72f-236d216bd4e1/resourceGroups/data-entry"
-}
-
 # ── Resource Group ─────────────────────────────────────
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
