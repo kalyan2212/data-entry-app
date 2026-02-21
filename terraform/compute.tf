@@ -51,7 +51,6 @@ resource "azurerm_linux_virtual_machine" "app" {
   size                = var.vm_size
   admin_username      = var.admin_username
   admin_password      = var.admin_password
-  zone                = "1"
 
   disable_password_authentication = false
 

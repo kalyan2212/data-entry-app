@@ -47,7 +47,6 @@ resource "azurerm_linux_virtual_machine" "db_primary" {
   size                = var.vm_size
   admin_username      = var.admin_username
   admin_password      = var.admin_password
-  zone                = "1"
 
   disable_password_authentication = false
 
@@ -82,7 +81,6 @@ resource "azurerm_linux_virtual_machine" "db_replica" {
   size                = var.vm_size
   admin_username      = var.admin_username
   admin_password      = var.admin_password
-  zone                = "1"
 
   disable_password_authentication = false
 
