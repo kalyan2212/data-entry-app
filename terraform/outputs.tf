@@ -18,10 +18,12 @@ output "db_primary_private_ip" {
   value       = azurerm_network_interface.db_primary.private_ip_address
 }
 
-output "db_replica_private_ip" {
-  description = "Private IP of the PostgreSQL replica VM (hot standby)"
-  value       = azurerm_network_interface.db_replica.private_ip_address
-}
+# db_replica_private_ip output disabled – replica VM disabled due to vCPU quota.
+# Re-enable when quota is increased and replica NIC/VM are uncommented.
+# output "db_replica_private_ip" {
+#   description = "Private IP of the PostgreSQL replica VM (hot standby)"
+#   value       = azurerm_network_interface.db_replica.private_ip_address
+# }
 
 output "resource_group_name" {
   value = azurerm_resource_group.main.name
